@@ -1,8 +1,13 @@
-# test_01
+# Shop Mall
 
 ## Project setup
 ```
 npm install
+```
+
+## Description
+```
+一个典型的商城后台管理系统
 ```
 
 ### Compiles and hot-reloads for development
