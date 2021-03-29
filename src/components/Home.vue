@@ -102,7 +102,7 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .home-container {
   // 全屏
   height: 100%;

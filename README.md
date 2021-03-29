@@ -7,7 +7,7 @@ npm install
 
 ## Description
 ```
-一个典型的商城后台管理系统
+商城管理系统
 ```
 
 ### Compiles and hot-reloads for development

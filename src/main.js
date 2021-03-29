@@ -19,7 +19,20 @@ axios.interceptors.request.use((config) => {
     return config
 })
 // 将axios直接挂载在Vue的原型上，这样就直接可以拿到
+// todo：将axios二次封装成为插件，在启动时注入main.js
 Vue.prototype.$http = axios
+// 配置http错误捕获方法
+Vue.prototype.$catchHttpError = function (error) {
+    if (!error) {
+        throw new Error('出现未知错误')
+    } else {
+        this.$message({
+            type: 'error',
+            message: error.message || 'Server Error'
+        })
+        console.error(error)
+    }
+}
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)

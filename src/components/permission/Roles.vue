@@ -7,8 +7,7 @@
     </el-breadcrumb>
 
     <el-card>
-      <el-button type="primary">添加角色</el-button>
-
+      <el-button type="primary" @click="isShowAddDialog=true">添加角色</el-button>
       <el-table :data="roleList" border stripe>
         <el-table-column type="expand">
           <template slot-scope="scope">
@@ -67,6 +66,21 @@
         <el-button type="primary" @click="setRightsForRole">确定</el-button>
       </span>
     </el-dialog>
+    <!--    添加角色-->
+    <el-dialog title="添加角色" :visible.sync="isShowAddDialog" width="500px" @close="closeAddRoleCb">
+      <el-form :model="addRoleForm" label-width="100px" ref="addRoleForm" :rules="addRoleRules">
+        <el-form-item prop="roleName" label="角色名称">
+          <el-input v-model="addRoleForm.roleName"></el-input>
+        </el-form-item>
+        <el-form-item prop="roleDesc" label="角色描述">
+          <el-input v-model="addRoleForm.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+          <el-button @click="isShowAddDialog=false">取消</el-button>
+          <el-button @click="handleAddRoleConfirm" type="primary">确定</el-button>
+        </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -86,7 +100,16 @@ export default {
       },
       defaultKeys: [],
       // 当前即将分配权限的role
-      roleId: ''
+      roleId: '',
+      isShowAddDialog: false,
+      addRoleForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      addRoleRules: {
+        roleName: [{required: true, message: '请输入角色名称'}],
+        roleDesc: [{required: true, message: '请输入角色描述'}]
+      }
     }
   },
   methods: {
@@ -96,7 +119,6 @@ export default {
         return this.$message.error('获取角色列表失败')
       }
       this.roleList = res.data
-      console.log(res.data)
     },
     //  删除role的right
     async removeRightById(role, rightId) {
@@ -158,6 +180,35 @@ export default {
       this.$message.success('分配权限成功')
       await this.getRoleList()
       this.showSetRightDialogVisible = false
+    },
+    //  关闭添加角色的对话框时的回调函数
+    closeAddRoleCb() {
+      this.addRoleForm = {
+        roleName: '',
+        roleDesc: ''
+      }
+      this.$nextTick(() => this.$refs.addRoleForm.clearValidate())
+    },
+    //  确定添加角色
+    async handleAddRoleConfirm() {
+      try {
+        await this.$refs.addRoleForm.validate()
+      } catch (e) {
+        return
+      }
+
+      try {
+        await this.$http.post(`roles`, this.addRoleForm)
+        this.$message({
+          type: 'success',
+          message: '添加角色成功'
+        })
+        await this.getRoleList()
+      } catch (error) {
+        this.$catchHttpError(error)
+      } finally {
+        this.isShowAddDialog = false
+      }
     }
   },
   created() {

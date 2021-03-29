@@ -30,16 +30,16 @@
         <el-table-column label="角色" prop="role_name"></el-table-column>
         <el-table-column label="状态">
           <!--作用域插槽-->
-          <template slot-scope="scope">
-            <el-switch v-model="scope.row.mg_state" @change="userStateChange(scope.row)"></el-switch>
+          <template v-slot="{row}">
+            <el-switch v-model="row.mg_state" @change="userStateChange(row)"></el-switch>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180px">
-          <template slot-scope="scope">
-            <el-button icon="el-icon-edit" type="primary" size="mini" @click="showEdit(scope.row)"></el-button>
-            <el-button icon="el-icon-delete" type="danger" size="mini" @click="handleDelete(scope.row.id)"></el-button>
+          <template v-slot="{row}">
+            <el-button icon="el-icon-edit" type="primary" size="mini" @click="showEdit(row)"></el-button>
+            <el-button icon="el-icon-delete" type="danger" size="mini" @click="handleDelete(row.id)"></el-button>
             <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button icon="el-icon-setting" type="warning" size="mini"></el-button>
+              <el-button icon="el-icon-setting" type="warning" size="mini" @click="handleDisRole(row.id)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -48,7 +48,7 @@
       <el-pagination @size-change="handleSizeChange"
                      @current-change="handleCurrentChange"
                      :current-page="queryInfo.pagenum"
-                     :page-sizes="[1,2,5,10]"
+                     :page-sizes="[10,15,20,25]"
                      :page-size="queryInfo.pagesize"
                      layout="total,sizes,prev,pager,next,jumper"
                      :total="total">
@@ -57,7 +57,7 @@
     </el-card>
 
     <!--    添加用户的对话框-->
-    <el-dialog title="添加用户" :visible.sync="addDialogUser" width="50%" @close="addDialogClosed">
+    <el-dialog title="添加用户" :visible.sync="addDialogUser" width="500px" @close="addDialogClosed">
       <el-form :model="addUserForm" ref="addUserRef" :rules="addUserFormRules" label-width="70px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addUserForm.username"></el-input>
@@ -79,7 +79,7 @@
     </el-dialog>
 
     <!--    编辑用户的对话框-->
-    <el-dialog title="修改用户" :visible.sync="showEditDialog" width="50%" @close="resetEditDialog">
+    <el-dialog title="修改用户" :visible.sync="showEditDialog" width="500px" @close="resetEditDialog">
       <el-form :model="editUserForm" ref="editUserRef" :rules="editUserFormRule" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="editUserForm.username" :disabled="true"></el-input>
@@ -97,9 +97,28 @@
       </span>
     </el-dialog>
 
-<!--    分配角色的对话框-->
-    <el-dialog>
-
+    <!--    分配角色的对话框：这个还没有做-->
+    <el-dialog title="分配角色"
+               :visible.sync="showDistributeRole"
+               @close="closeDisRoleCb"
+               width="500px">
+      <el-form :model="disRoleForm"
+               ref="disRoleForm"
+               :rules="disRoleFormRules"
+               label-width="100px">
+        <el-form-item prop="rid" label="角 色">
+          <el-select v-model="disRoleForm.rid" style="width: 250px" clearable>
+            <el-option v-for="role in roles"
+                       :label="role.roleName"
+                       :key="role.id"
+                       :value="role.id"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+        <el-button @click="showDistributeRole = false">取消</el-button>
+        <el-button @click="handleDistributeConfirm()" type="primary">确定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -129,7 +148,7 @@ export default {
         query: '',
         // 当前页数
         pagenum: 1,
-        pagesize: 2
+        pagesize: 10
       },
       userList: [],
       total: 0,
@@ -174,7 +193,18 @@ export default {
         mobile: [
           {required: true, message: '请输入手机号码'}, {validator: checkMobile, trigger: 'blur'}
         ]
-      }
+      },
+      //  角色数据
+      roles: [],
+      showDistributeRole: false,
+      disRoleForm: {
+        rid: ''
+      },
+      disRoleFormRules: {
+        rid: [{required: true, message: '请选择一个角色'}]
+      },
+      //  当前准备分配的user
+      currentUserId: ''
     }
   },
   methods: {
@@ -272,15 +302,56 @@ export default {
         return this.$message.error('删除用户失败')
       }
       this.$message.success('删除用户成功')
-      this.getUserList()
+      await this.getUserList()
+    },
+    //  获取全部的role
+    async getAllRoles() {
+      try {
+        const {data} = await this.$http.get(`roles`)
+        this.roles = data.data
+      } catch (error) {
+        this.$catchHttpError(error)
+      }
+    },
+    // 显示分配角色的对话框
+    handleDisRole(id) {
+      this.showDistributeRole = true
+      this.currentUserId = id
+    },
+    // 确定分配权限
+    async handleDistributeConfirm() {
+      try {
+        await this.$refs.disRoleForm.validate()
+      } catch (e) {
+        return
+      }
+
+      try {
+        await this.$http.put(`users/${this.currentUserId}/role`, this.disRoleForm)
+        this.$message({
+          type: 'success',
+          message: '修改角色成功'
+        })
+        await this.getUserList()
+      } catch (error) {
+        this.$catchHttpError(error)
+      } finally {
+        this.showDistributeRole = false
+      }
+    },
+    //  关闭分配角色对话框的回调
+    closeDisRoleCb() {
+      this.disRoleForm.rid = ''
+      this.$nextTick(() => this.$refs.disRoleForm.clearValidate())
     }
   },
   created() {
     this.getUserList()
+    this.getAllRoles()
   }
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 
 </style>
