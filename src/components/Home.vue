@@ -3,10 +3,9 @@
     <!--    头部区域-->
     <el-header>
       <div>
-        <img src="../assets/logo.png" style="width: 50px" alt="logo">
-        <span>淘宝后台管理系统</span>
+        <img src="../assets/logo.png" style="width: 240px" alt="logo">
       </div>
-      <el-button type="info" @click="logout">退出登录</el-button>
+      <el-button type="danger" @click="logout">退出登录</el-button>
     </el-header>
     <!--    页面主体区域-->
     <el-container>
