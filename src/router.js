@@ -9,6 +9,8 @@ import Roles from "./components/permission/Roles";
 import ClassPara from "./components/goods/ClassPara";
 import Goods from "./components/goods/Goods";
 import GoodsPara from "./components/goods/GoodsPara";
+import Order from "./components/order/Order"
+import Statistics from "./components/statistics/Statistics";
 
 Vue.use(Router)
 
@@ -28,7 +30,9 @@ const router = new Router({
                 {path: '/roles', component: Roles},
                 {path: '/goods', component: Goods},
                 {path: '/params', component: ClassPara},
-                {path: '/categories', component: GoodsPara}
+                {path: '/categories', component: GoodsPara},
+                {path: '/orders', component: Order},
+                {path: '/reports', component: Statistics}
             ]
         }
     ]
