@@ -22,9 +22,9 @@
         <el-table-column label="商品重量（克）" prop="goods_weight" width="120px"></el-table-column>
         <el-table-column label="添加时间" prop="add_time" width="200px"></el-table-column>
         <el-table-column label="操作" width="120px">
-          <template>
+          <template v-slot="{row}">
             <el-button class="el-icon-edit" size="mini" type="primary"></el-button>
-            <el-button class="el-icon-delete" size="mini" type="danger"></el-button>
+            <el-button class="el-icon-delete" size="mini" type="danger" @click="handleDelete(row)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -83,6 +83,28 @@ export default {
     handleCurrentChange(val) {
       this.pageData.pagenum = val
       this.getGoodsList()
+    },
+    //   删除商品
+    async handleDelete(row) {
+      try {
+        await this.$confirm('确认删除该商品吗？', '确认', {
+          cancelButtonText: '取消',
+          confirmButtonText: '确认'
+        })
+      } catch (e) {
+        return
+      }
+
+      try {
+        await this.$http.delete(`goods/${row.goods_id}`)
+        this.$message({
+          type: 'success',
+          message: '删除商品成功'
+        })
+        await this.getGoodsList()
+      } catch (error) {
+        this.$catchHttpError(error)
+      }
     }
   },
   created() {
