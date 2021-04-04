@@ -3,9 +3,10 @@ import App from './App.vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import router from './router'
+import ZkTable from 'vue-table-with-tree-grid'
 
 // 引入全局样式
-import './assets/css/global.css'
+import './assets/css/global.less'
 import animated from 'animate.css'
 
 // 引入axios
@@ -37,6 +38,7 @@ Vue.prototype.$catchHttpError = function (error) {
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(animated)
+Vue.use(ZkTable)
 
 new Vue({
     router,
