@@ -9,10 +9,10 @@
     <!--    card区域-->
     <el-card>
       <el-row>
-        <el-input v-model="searchPara" style="width: 400px;margin-right: 20px" clearable>
-          <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-input v-model="searchPara" style="width: 400px;margin-right: 20px" @clear="handleSearchClear" clearable>
+          <el-button slot="append" icon="el-icon-search" @click="getGoodsList"></el-button>
         </el-input>
-        <el-button type="primary">添加商品</el-button>
+        <el-button type="primary" @click="goAddGoods">添加商品</el-button>
       </el-row>
       <!--      商品列表-->
       <el-table :data="goodsList" border stripe>
@@ -20,7 +20,11 @@
         <el-table-column label="商品名称" prop="goods_name"></el-table-column>
         <el-table-column label="商品价格（元）" prop="goods_price" width="120px"></el-table-column>
         <el-table-column label="商品重量（克）" prop="goods_weight" width="120px"></el-table-column>
-        <el-table-column label="添加时间" prop="add_time" width="200px"></el-table-column>
+        <el-table-column label="添加时间" prop="add_time" width="200px">
+          <template v-slot="{row}">
+            {{ row.add_time|dateformat }}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="120px">
           <template v-slot="{row}">
             <el-button class="el-icon-edit" size="mini" type="primary"></el-button>
@@ -76,6 +80,9 @@ export default {
         this.$catchHttpError(error)
       }
     },
+    handleSearchClear() {
+      this.getGoodsList()
+    },
     handleSizeChange(val) {
       this.pageData.pagesize = val
       this.getGoodsList()
@@ -105,6 +112,10 @@ export default {
       } catch (error) {
         this.$catchHttpError(error)
       }
+    },
+    // 通过路由跳转到添加商品的页面
+    goAddGoods() {
+      this.$router.push('/goods/add')
     }
   },
   created() {

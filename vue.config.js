@@ -11,6 +11,8 @@ portfinder.getPort({
 
 // 配置webpack
 module.exports = {
+    // 关闭ES-LINT
+    lintOnSave: false,
     // 注意配置的数据结构
     configureWebpack: {
         plugins: [

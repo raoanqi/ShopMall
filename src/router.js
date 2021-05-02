@@ -11,6 +11,7 @@ import Goods from "./components/goods/Goods";
 import GoodsPara from "./components/goods/GoodsPara";
 import Order from "./components/order/Order"
 import Statistics from "./components/statistics/Statistics";
+import Add from "./components/goods/Add";
 
 Vue.use(Router)
 
@@ -29,6 +30,7 @@ const router = new Router({
                 {path: '/rights', component: Rights},
                 {path: '/roles', component: Roles},
                 {path: '/goods', component: Goods},
+                {path: '/goods/add', component: Add},
                 {path: '/params', component: ClassPara},
                 {path: '/categories', component: GoodsPara},
                 {path: '/orders', component: Order},
